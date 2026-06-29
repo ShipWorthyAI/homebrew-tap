@@ -22,8 +22,8 @@ FORMULA = """class Brewlock < Formula
   desc "The missing lock file for Homebrew"
   homepage "https://github.com/ShipWorthyAI/brewlock"
   url "https://github.com/ShipWorthyAI/brewlock/releases/download/v0.4.0/brewlock-darwin-arm64.tar.gz"
-  sha256 "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
   version "0.4.0"
+  sha256 "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
   license "MIT"
 
   on_macos do
