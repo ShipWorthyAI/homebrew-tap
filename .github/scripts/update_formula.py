@@ -92,7 +92,7 @@ def replace_once(text: str, pattern: str, replacement: str, description: str) ->
 
 def stanza_body(text: str, stanza: str) -> re.Match[str] | None:
     return re.search(
-        rf"(?P<header>^\s*{stanza}\s+do\s*$\n)(?P<body>.*?)(?=^\s*(?:on_macos\s+do|on_linux\s+do|head |def |test do|end\s*$))",
+        rf"(?P<header>^  {stanza}\s+do\s*$\n)(?P<body>.*?)(?=^  (?:on_macos\s+do|on_linux\s+do|head |def |test do)|^end\s*$)",
         text,
         flags=re.MULTILINE | re.DOTALL,
     )

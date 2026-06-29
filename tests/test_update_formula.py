@@ -25,17 +25,17 @@ FORMULA = """class Brewlock < Formula
   license "MIT"
 
   on_macos do
-    depends_on arch: :arm64
-
-    url "https://github.com/ShipWorthyAI/brewlock/releases/download/v0.4.0/brewlock-darwin-arm64.tar.gz"
-    sha256 "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    on_arm do
+      url "https://github.com/ShipWorthyAI/brewlock/releases/download/v0.4.0/brewlock-darwin-arm64.tar.gz"
+      sha256 "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    end
   end
 
   on_linux do
-    depends_on arch: :x86_64
-
-    url "https://github.com/ShipWorthyAI/brewlock/releases/download/v0.4.0/brewlock-linux-x64.tar.gz"
-    sha256 "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    on_intel do
+      url "https://github.com/ShipWorthyAI/brewlock/releases/download/v0.4.0/brewlock-linux-x64.tar.gz"
+      sha256 "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    end
   end
 end
 """

@@ -2,23 +2,23 @@
 # frozen_string_literal: true
 
 class Brewlock < Formula
-  desc "The missing lock file for Homebrew"
+  desc "Version-locking wrapper for Homebrew"
   homepage "https://github.com/ShipWorthyAI/brewlock"
   version "0.4.0"
   license "MIT"
 
   on_macos do
-    depends_on arch: :arm64
-
-    url "https://github.com/ShipWorthyAI/brewlock/releases/download/v0.4.0/brewlock-darwin-arm64.tar.gz"
-    sha256 "e19df06692ad5ec993113b11f7053283bf9e89713b7fcbc417d62103ed58a8b3"
+    on_arm do
+      url "https://github.com/ShipWorthyAI/brewlock/releases/download/v0.4.0/brewlock-darwin-arm64.tar.gz"
+      sha256 "e19df06692ad5ec993113b11f7053283bf9e89713b7fcbc417d62103ed58a8b3"
+    end
   end
 
   on_linux do
-    depends_on arch: :x86_64
-
-    url "https://github.com/ShipWorthyAI/brewlock/releases/download/v0.4.0/brewlock-linux-x64.tar.gz"
-    sha256 "f5b32cf9d8cedef549e526e8bcf44a4432776cba62f43c2b58d8d2ded37f15e2"
+    on_intel do
+      url "https://github.com/ShipWorthyAI/brewlock/releases/download/v0.4.0/brewlock-linux-x64.tar.gz"
+      sha256 "f5b32cf9d8cedef549e526e8bcf44a4432776cba62f43c2b58d8d2ded37f15e2"
+    end
   end
 
   def install
