@@ -98,24 +98,42 @@ def stanza_body(text: str, stanza: str) -> re.Match[str] | None:
     )
 
 
+def update_url_and_sha(text: str, asset: ReleaseAsset, description: str) -> str:
+    text = replace_once(
+        text,
+        r'(?P<prefix>^\s*url\s+")[^"]+(?P<suffix>")',
+        rf'\g<prefix>{asset.url}\g<suffix>',
+        f"{description} url",
+    )
+    return replace_once(
+        text,
+        r'(?P<prefix>^\s*sha256\s+")[0-9a-f]+(?P<suffix>")',
+        rf"\g<prefix>{asset.sha256}\g<suffix>",
+        f"{description} sha256",
+    )
+
+
+def update_top_level_asset(text: str, asset: ReleaseAsset) -> str:
+    text = replace_once(
+        text,
+        r'(?P<prefix>^  url\s+")[^"]+(?P<suffix>")',
+        rf'\g<prefix>{asset.url}\g<suffix>',
+        "top-level url",
+    )
+    return replace_once(
+        text,
+        r'(?P<prefix>^  sha256\s+")[0-9a-f]+(?P<suffix>")',
+        rf"\g<prefix>{asset.sha256}\g<suffix>",
+        "top-level sha256",
+    )
+
+
 def update_stanza(text: str, stanza: str, asset: ReleaseAsset) -> str:
     match = stanza_body(text, stanza)
     if match is None:
         raise FormulaShapeError(f"expected {stanza} stanza")
 
-    body = match.group("body")
-    body = replace_once(
-        body,
-        r'(?P<prefix>^\s*url\s+")[^"]+(?P<suffix>")',
-        rf'\g<prefix>{asset.url}\g<suffix>',
-        f"{stanza} url",
-    )
-    body = replace_once(
-        body,
-        r'(?P<prefix>^\s*sha256\s+")[0-9a-f]+(?P<suffix>")',
-        rf"\g<prefix>{asset.sha256}\g<suffix>",
-        f"{stanza} sha256",
-    )
+    body = update_url_and_sha(match.group("body"), asset, stanza)
     return text[: match.start("body")] + body + text[match.end("body") :]
 
 
@@ -136,7 +154,7 @@ def update_formula(text: str, update: FormulaUpdate) -> str:
         rf"\g<prefix>{update.version}\g<suffix>",
         "version",
     )
-    text = update_stanza(text, "on_macos", macos)
+    text = update_top_level_asset(text, macos)
     text = update_stanza(text, "on_linux", linux)
     print(f"macOS: {macos.sha256}  {macos.url}")
     print(f"Linux: {linux.sha256}  {linux.url}")
