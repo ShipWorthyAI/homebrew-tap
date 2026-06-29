@@ -4,10 +4,10 @@
 class Brewlock < Formula
   desc "Version-locking wrapper for Homebrew"
   homepage "https://github.com/ShipWorthyAI/brewlock"
-  version "0.4.0"
-  license "MIT"
   url "https://github.com/ShipWorthyAI/brewlock/releases/download/v0.4.0/brewlock-darwin-arm64.tar.gz"
   sha256 "e19df06692ad5ec993113b11f7053283bf9e89713b7fcbc417d62103ed58a8b3"
+  version "0.4.0"
+  license "MIT"
 
   on_macos do
     depends_on arch: :arm64
