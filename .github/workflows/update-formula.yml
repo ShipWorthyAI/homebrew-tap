@@ -1,0 +1,71 @@
+name: Update Formula
+run-name: Update ${{ inputs.formula }} for ${{ inputs.tag }}${{ inputs.request_id && format(' ({0})', inputs.request_id) || '' }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      formula:
+        description: Formula name
+        required: true
+        type: string
+      tag:
+        description: Release tag to update formula for
+        required: true
+        type: string
+      repository:
+        description: Source repository, for example ShipWorthyAI/brewlock
+        required: true
+        type: string
+      macos_artifact:
+        description: macOS release artifact name
+        required: true
+        type: string
+      linux_artifact:
+        description: Linux release artifact name
+        required: true
+        type: string
+      request_id:
+        description: Caller-generated ID used to identify this workflow run
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  update-formula:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout tap repository
+        uses: actions/checkout@v6
+
+      - name: Set up Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Update formula
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 .github/scripts/update_formula.py \
+            --formula "${{ inputs.formula }}" \
+            --tag "${{ inputs.tag }}" \
+            --repository "${{ inputs.repository }}" \
+            --macos-artifact "${{ inputs.macos_artifact }}" \
+            --linux-artifact "${{ inputs.linux_artifact }}"
+
+      - name: Commit and push
+        run: |
+          FORMULA="${{ inputs.formula }}"
+          TAG="${{ inputs.tag }}"
+
+          git add "Formula/${FORMULA}.rb"
+
+          if git diff --cached --quiet; then
+            echo "Formula/${FORMULA}.rb already up to date"
+            exit 0
+          fi
+
+          git commit -m "${FORMULA}: update formula for ${TAG}"
+          git push

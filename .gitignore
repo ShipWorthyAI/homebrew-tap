@@ -1,0 +1,7 @@
+.DS_Store
+*.bottle.*
+*.json
+*.pyc
+__pycache__/
+home/
+logs/
