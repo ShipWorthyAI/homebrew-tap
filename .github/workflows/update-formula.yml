@@ -12,6 +12,10 @@ on:
         description: Release tag to update formula for
         required: true
         type: string
+      version:
+        description: Formula version override, used when the download tag is not v<version>
+        required: false
+        type: string
       repository:
         description: Source repository, for example ShipWorthyAI/brewlock
         required: true
@@ -22,7 +26,7 @@ on:
         type: string
       linux_artifact:
         description: Linux release artifact name
-        required: true
+        required: false
         type: string
       request_id:
         description: Caller-generated ID used to identify this workflow run
@@ -46,14 +50,30 @@ jobs:
 
       - name: Update formula
         env:
+          FORMULA: ${{ inputs.formula }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LINUX_ARTIFACT: ${{ inputs.linux_artifact }}
+          MACOS_ARTIFACT: ${{ inputs.macos_artifact }}
+          REPOSITORY: ${{ inputs.repository }}
+          TAG: ${{ inputs.tag }}
+          VERSION: ${{ inputs.version }}
         run: |
-          python3 .github/scripts/update_formula.py \
-            --formula "${{ inputs.formula }}" \
-            --tag "${{ inputs.tag }}" \
-            --repository "${{ inputs.repository }}" \
-            --macos-artifact "${{ inputs.macos_artifact }}" \
-            --linux-artifact "${{ inputs.linux_artifact }}"
+          args=(
+            --formula "$FORMULA"
+            --tag "$TAG"
+            --repository "$REPOSITORY"
+            --macos-artifact "$MACOS_ARTIFACT"
+          )
+
+          if [[ -n "$VERSION" ]]; then
+            args+=(--version "$VERSION")
+          fi
+
+          if [[ -n "$LINUX_ARTIFACT" ]]; then
+            args+=(--linux-artifact "$LINUX_ARTIFACT")
+          fi
+
+          python3 .github/scripts/update_formula.py "${args[@]}"
 
       - name: Commit and push
         run: |

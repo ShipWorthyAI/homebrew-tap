@@ -41,6 +41,23 @@ FORMULA = """class Brewlock < Formula
 end
 """
 
+INSOMNIAC_FORMULA = """class Insomniac < Formula
+  desc "macOS cursor blink utility to keep the machine awake"
+  homepage "https://github.com/ShipWorthyAI/homebrew-tap"
+  url "https://github.com/ShipWorthyAI/homebrew-tap/releases/download/insomniac-v0.0.0/insomniac-darwin-arm64.tar.gz"
+  version "0.0.0"
+  sha256 "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  license "MIT"
+
+  depends_on arch: :arm64
+  depends_on :macos
+
+  def install
+    bin.install "insomniac"
+  end
+end
+"""
+
 
 class UpdateFormulaTest(unittest.TestCase):
     def test_updates_brewlock_formula_from_release_assets(self) -> None:
@@ -78,6 +95,41 @@ class UpdateFormulaTest(unittest.TestCase):
         self.assertIn("releases/download/v0.5.0/brewlock-linux-x64.tar.gz", updated)
         self.assertIn('sha256 "' + "c" * 64 + '"', updated)
         self.assertIn('sha256 "' + "d" * 64 + '"', updated)
+
+    def test_updates_macos_only_formula_from_release_asset(self) -> None:
+        original_cwd = os.getcwd()
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            formula_dir = root / "Formula"
+            formula_dir.mkdir()
+            formula_path = formula_dir / "insomniac.rb"
+            formula_path.write_text(INSOMNIAC_FORMULA)
+
+            os.chdir(root)
+            try:
+                with mock.patch.object(update_formula, "sha256", return_value="e" * 64) as checksum:
+                    update_formula.main(
+                        [
+                            "--formula",
+                            "insomniac",
+                            "--tag",
+                            "insomniac-v0.1.0",
+                            "--version",
+                            "0.1.0",
+                            "--repository",
+                            "ShipWorthyAI/homebrew-tap",
+                            "--macos-artifact",
+                            "insomniac-darwin-arm64.tar.gz",
+                        ],
+                    )
+                updated = formula_path.read_text()
+            finally:
+                os.chdir(original_cwd)
+
+        self.assertIn('version "0.1.0"', updated)
+        self.assertIn("releases/download/insomniac-v0.1.0/insomniac-darwin-arm64.tar.gz", updated)
+        self.assertIn('sha256 "' + "e" * 64 + '"', updated)
+        checksum.assert_called_once()
 
 
 if __name__ == "__main__":

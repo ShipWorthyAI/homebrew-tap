@@ -38,10 +38,13 @@ class FormulaUpdate:
     tag: str
     repository: str
     macos_artifact: str
-    linux_artifact: str
+    linux_artifact: str | None
+    version_override: str | None
 
     @property
     def version(self) -> str:
+        if self.version_override is not None:
+            return self.version_override
         return self.tag[1:] if self.tag.startswith("v") else self.tag
 
     def asset_url(self, artifact: str) -> str:
@@ -70,9 +73,10 @@ def parse_args(argv: list[str]) -> FormulaUpdate:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--formula", required=True)
     parser.add_argument("--tag", required=True)
+    parser.add_argument("--version")
     parser.add_argument("--repository", required=True)
     parser.add_argument("--macos-artifact", required=True)
-    parser.add_argument("--linux-artifact", required=True)
+    parser.add_argument("--linux-artifact")
     args = parser.parse_args(argv)
     return FormulaUpdate(
         formula=args.formula,
@@ -80,6 +84,7 @@ def parse_args(argv: list[str]) -> FormulaUpdate:
         repository=args.repository,
         macos_artifact=args.macos_artifact,
         linux_artifact=args.linux_artifact,
+        version_override=args.version,
     )
 
 
@@ -139,9 +144,7 @@ def update_stanza(text: str, stanza: str, asset: ReleaseAsset) -> str:
 
 def update_formula(text: str, update: FormulaUpdate) -> str:
     macos_url = update.asset_url(update.macos_artifact)
-    linux_url = update.asset_url(update.linux_artifact)
     macos = ReleaseAsset(macos_url, sha256(macos_url))
-    linux = ReleaseAsset(linux_url, sha256(linux_url))
     text = replace_once(
         text,
         r'(?P<prefix>^\s*homepage\s+")[^"]+(?P<suffix>")',
@@ -155,9 +158,12 @@ def update_formula(text: str, update: FormulaUpdate) -> str:
         "version",
     )
     text = update_top_level_asset(text, macos)
-    text = update_stanza(text, "on_linux", linux)
     print(f"macOS: {macos.sha256}  {macos.url}")
-    print(f"Linux: {linux.sha256}  {linux.url}")
+    if update.linux_artifact is not None:
+        linux_url = update.asset_url(update.linux_artifact)
+        linux = ReleaseAsset(linux_url, sha256(linux_url))
+        text = update_stanza(text, "on_linux", linux)
+        print(f"Linux: {linux.sha256}  {linux.url}")
     return text
 
 
